@@ -43,4 +43,9 @@ public class UserController {
     public Optional<User> getUserByEmail(@PathVariable String email){
         return userService.getUserByEmail(email);
     }
+
+    @PostMapping("/login")
+    public String login(@RequestBody User user){
+        return userService.verify(user);
+    }
 }

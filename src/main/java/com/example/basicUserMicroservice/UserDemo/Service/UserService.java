@@ -3,6 +3,11 @@ package com.example.basicUserMicroservice.UserDemo.Service;
 import com.example.basicUserMicroservice.UserDemo.Entity.User;
 import com.example.basicUserMicroservice.UserDemo.Entity.UserPrinciple;
 import com.example.basicUserMicroservice.UserDemo.Repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,11 +20,14 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
+    private final AuthenticationConfiguration authenticationConfiguration;
+
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository){
+    public UserService(AuthenticationConfiguration authenticationConfiguration, UserRepository userRepository) throws Exception {
+        this.authenticationConfiguration = authenticationConfiguration;
         this.userRepository = userRepository;
     }
 
@@ -48,5 +56,19 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("user not found");
         }
         return new UserPrinciple(user);
+    }
+
+    public String verify(User user) {
+        try {
+            AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
+            );
+
+            return authentication.isAuthenticated() ? "Success" : "Failed";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed";
+        }
     }
 }
