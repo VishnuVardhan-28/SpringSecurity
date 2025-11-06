@@ -6,6 +6,7 @@ import com.example.basicUserMicroservice.UserDemo.Repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+
     private final UserRepository userRepository;
 
     public UserService(UserRepository userRepository){
@@ -21,6 +24,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User saveUser(User user){
+        user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
