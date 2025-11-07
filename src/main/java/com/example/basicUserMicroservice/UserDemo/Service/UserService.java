@@ -26,6 +26,9 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    @Autowired
+    private JWTService jwtService;
+
     public UserService(AuthenticationConfiguration authenticationConfiguration, UserRepository userRepository) throws Exception {
         this.authenticationConfiguration = authenticationConfiguration;
         this.userRepository = userRepository;
@@ -65,7 +68,7 @@ public class UserService implements UserDetailsService {
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
             );
 
-            return authentication.isAuthenticated() ? "Success" : "Failed";
+            return authentication.isAuthenticated() ? jwtService.generateToken(user.getUsername()) : "Failed";
         } catch (Exception e) {
             e.printStackTrace();
             return "Failed";
